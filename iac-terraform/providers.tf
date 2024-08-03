@@ -7,20 +7,20 @@
 
 # Set credentials for deployment
 
+terraform {
+  required_providers {
+    google = {
+      source = "hashicorp/google"
+      version = "5.39.1"
+    }
+  }
+}
+
 provider "google" {
     project     = var.project_id
     region      = var.region
     zone        = var.zone
 }
-
-terraform {
-  required_version = ">= 0..13"
-  backend "gcs" {
-    bucket = "BUCKET_NAME"
-    prefix = "terraform/state"
-  }
-}
-
 
 # project = "var.project_id"
 # name = "build-brand-gemini"

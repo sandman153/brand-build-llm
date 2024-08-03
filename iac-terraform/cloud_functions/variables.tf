@@ -14,3 +14,8 @@ variable "pubsub_topic_name" {
     type = string
   
 }
+
+variable "region" {
+    type = string
+  
+}

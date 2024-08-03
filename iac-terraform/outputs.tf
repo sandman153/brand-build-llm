@@ -1,3 +1,3 @@
-output "cloud_function_url" {
-  value = module.cloud_functions.url
+output "secret_ids" {
+  value = keys(google_secret_manager_secret.secret)
 }
