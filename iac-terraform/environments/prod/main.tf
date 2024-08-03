@@ -1,11 +1,11 @@
 module "pubsub" {
-  source = "../../pubsub"
+  source = "../../modules/pubsub"
   topic_name = var.pubsub_topic_name
   subscription_name = var.pubsub_subscription_name
 }
 
 module "cloud_functions" {
-  source =  "../../cloud_functions"
+  source =  "../../modules/cloud_functions"
   project_id = var.project_id
   source_bucket_name = var.source_bucket_name
   source_archive_path = var.source_archive_path
@@ -14,7 +14,7 @@ module "cloud_functions" {
 }
 
 module "scheduler" {
-  source = "../../scheduler"
+  source = "../../modules/scheduler"
   scheduler_name = var.scheduler_name
   schedule = var.schedule
   time_zone = var.time_zone
@@ -22,7 +22,7 @@ module "scheduler" {
 }
 
 module "secret_manager" {
-    source = "./secret_manager"
+    source = "../../modules/secret_manager"
     secrets = {
     "feedly-token"               = "YOUR_FEEDLY_TOKEN",
     "buffer-access-token"        = "YOUR_BUFFER_ACCESS_TOKEN",
@@ -34,6 +34,6 @@ module "secret_manager" {
 }
 
 module "iam" {
-    source = "../../iam"
+    source = "../../modules/iam"
     project_id = var.project_id
 }

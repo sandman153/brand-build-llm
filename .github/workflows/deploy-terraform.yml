@@ -83,6 +83,13 @@ jobs:
 
       - name: List prod directory contents
         run: ls -al ./iac-terraform/environments/prod
+      
+      - name: List modules directory contents
+        run: ls -al ./terraform/modules
+      
+      - name: List scheduler module contents
+        run: ls -al ./terraform/modules/scheduler
+
     
       - name: Download Terraform Plan
         uses: actions/download-artifact@v2
