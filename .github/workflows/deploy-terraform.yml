@@ -18,6 +18,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: List root directory contents
+        run: ls -al 
+
+      - name: List terraform directory contents
+        run: ls -al ./terraform
+
+      - name: List environments directory contents
+        run: ls -al ./terraform/environments
+
+      - name: List prod directory contents
+        run: ls -al ./terraform/environments/prod
+
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
@@ -59,6 +71,18 @@ jobs:
 
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: List root directory contents
+        run: ls -al 
+
+      - name: List terraform directory contents
+        run: ls -al ./terraform
+
+      - name: List environments directory contents
+        run: ls -al ./terraform/environments
+
+      - name: List prod directory contents
+        run: ls -al ./terraform/environments/prod
     
       - name: Download Terraform Plan
         uses: actions/download-artifact@v2
