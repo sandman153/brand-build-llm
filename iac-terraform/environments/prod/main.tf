@@ -1,11 +1,11 @@
 module "pubsub" {
-  source = "./pubsub"
+  source = "../../pubsub"
   topic_name = var.pubsub_topic_name
   subscription_name = var.pubsub_subscription_name
 }
 
 module "cloud_functions" {
-  source = "./cloud_functions"
+  source =  "../../cloud_functions"
   project_id = var.project_id
   source_bucket_name = var.source_bucket_name
   source_archive_path = var.source_archive_path
@@ -14,7 +14,7 @@ module "cloud_functions" {
 }
 
 module "scheduler" {
-  source = "./scheduler"
+  source = "../../scheduler"
   scheduler_name = var.scheduler_name
   schedule = var.schedule
   time_zone = var.time_zone
@@ -34,6 +34,6 @@ module "secret_manager" {
 }
 
 module "iam" {
-    source = "./iam"
+    source = "../../iam"
     project_id = var.project_id
 }
