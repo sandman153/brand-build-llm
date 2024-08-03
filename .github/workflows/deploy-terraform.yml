@@ -30,6 +30,12 @@ jobs:
       - name: List prod directory contents
         run: ls -al ./iac-terraform/environments/prod
 
+      - name: List modules directory contents
+        run: ls -al ./terraform/modules
+      
+      - name: List scheduler module contents
+        run: ls -al ./terraform/modules/scheduler
+
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
         with:
