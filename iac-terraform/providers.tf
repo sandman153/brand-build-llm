@@ -7,6 +7,26 @@
 
 # Set credentials for deployment
 
+variable "project_id" {
+  description = "The GCP project ID"
+  type = string
+}
+
+variable "region" {
+  description = "The GCP region"
+  type = string
+}
+
+variable "zone" {
+  description = "The GCP zone"
+  type = string
+}
+
+variable "credentials_file_path" {
+  description = "The path to the GCP service account credentials file"
+  type = string
+}
+
 terraform {
   required_providers {
     google = {

@@ -8,12 +8,128 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'deploy'
+
 
 jobs:
   terraform:
     name: 'Terraform'
     runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: List root directory contents
+        run: ls -al 
+
+      - name: List terraform directory contents
+        run: ls -al ./iac-terraform
+
+      - name: List environments directory contents
+        run: ls -al ./iac-terraform/environments
+
+      - name: List prod directory contents
+        run: ls -al ./iac-terraform/environments/prod
+
+      - name: List modules directory contents
+        run: ls -al ./iac-terraform/modules
+      
+      - name: List scheduler module contents
+        run: ls -al ./iac-terraform/modules/scheduler
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: 'latest'
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          export_default_credentials: true
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.1.0
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./iac-terraform/environments/prod
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: ./iac-terraform/environments/prod
+
+      - name: Upload Terraform Plan
+        uses: actions/upload-artifact@v2
+        with:
+          name: tfplan
+          path: ./iac-terraform/environments/prod/tfplan
+
+  deploy:
+    name: 'Deploy'
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Manual Approval
+        uses: hmarr/auto-approve-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          wait_seconds: 30
+          number_of_approvals: 1
+
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: List root directory contents
+        run: ls -al 
+
+      - name: List terraform directory contents
+        run: ls -al ./iac-terraform
+
+      - name: List environments directory contents
+        run: ls -al ./iac-terraform/environments
+
+      - name: List prod directory contents
+        run: ls -al ./iac-terraform/environments/prod
+      
+      - name: List modules directory contents
+        run: ls -al ./iac-terraform/modules
+      
+      - name: List scheduler module contents
+        run: ls -al ./iac-terraform/modules/scheduler
+
+    
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan
+          path: ./iac-terraform/environments/prod
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          export_default_credentials: true
+    
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.1.0
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve ./iac-terraform/environments/prod/tfplan
+        working-directory: ./iac-terraform/environments/prod
+  
+  delete:
+    name: 'Delete'
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'delete'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -34,50 +150,6 @@ jobs:
         run: terraform init
         working-directory: ./terraform/environments/prod
 
-      - name: Terraform Plan
-        run: terraform plan -out=tfplan
-        working-directory: ./terraform/environments/prod
-
-      - name: Upload Terraform Plan
-        uses: actions/upload-artifact@v2
-        with:
-          name: tfplan
-          path: ./terraform/environments/prod/tfplan
-
-  deploy:
-    name: 'Deploy'
-    runs-on: ubuntu-latest
-    needs: terraform
-    if: github.event_name == 'workflow_dispatch'
-    steps:
-      - name: Manual Approval
-        uses: hmarr/auto-approve-action@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          wait_seconds: 30
-          number_of_approvals: 1
-
-      - name: Checkout Code
-        uses: actions/checkout@v3
-    
-      - name: Download Terraform Plan
-        uses: actions/download-artifact@v2
-        with:
-          name: tfplan
-          path: ./terraform/environments/prod
-
-      - name: Setup Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          export_default_credentials: true
-    
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.1.0
-
-      - name: Terraform Apply
-        run: terraform apply -auto-approve ./terraform/environments/prod/tfplan
+      - name: Terraform Destroy
+        run: terraform destroy -auto-approve
         working-directory: ./terraform/environments/prod
