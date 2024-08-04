@@ -1,6 +1,3 @@
-terraform {
-  backend "gcs" {
-    bucket = "BUCKET_NAME"
-    prefix = "terraform/state/dev"
-  }
+output "cloud_functions_url" {
+  value = module.cloud_functions.url 
 }

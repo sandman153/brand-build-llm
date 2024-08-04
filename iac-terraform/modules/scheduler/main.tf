@@ -1,5 +1,5 @@
 resource "google_cloud_scheduler_job" "gemini_scheduler" {
-    name = var.scheduler-name
+    name = var.scheduler_name
     description = "Periodic job to trigger the Gemini function"
     schedule = var.schedule
     time_zone = var.time_zone
@@ -8,6 +8,4 @@ resource "google_cloud_scheduler_job" "gemini_scheduler" {
       topic_name = var.pubsub_topic
       data = jsondecode({message = "Trigger Function"})
     }
-
-  
 }

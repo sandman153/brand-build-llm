@@ -1,4 +1,4 @@
-variable "scheduler-name" {
+variable "scheduler_name" {
     type = string
     default = "gemini-scheduler"
 }
@@ -12,10 +12,6 @@ variable "time_zone" {
 }
 
 variable "pubsub_topic" {
-    type = string
+  description = "The Pub/Sub topic to trigger"
+  type        = string
 }
-
-variable topic_name {
-    type = string
-}
-
