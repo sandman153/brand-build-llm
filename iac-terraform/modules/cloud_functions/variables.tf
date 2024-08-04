@@ -15,11 +15,6 @@ variable "pubsub_topic" {
   
 }
 
-variable "region" {
-    type = string
-  
-}
-
 variable "repository_url" {
     type = string
   
