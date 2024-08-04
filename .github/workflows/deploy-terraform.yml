@@ -25,7 +25,7 @@ jobs:
       - name: List root directory contents
         run: ls -al
 
-      - name: List terraform directory contents
+      - name: List iac-terraform directory contents
         run: ls -al ./iac-terraform
 
       - name: List environments directory contents
