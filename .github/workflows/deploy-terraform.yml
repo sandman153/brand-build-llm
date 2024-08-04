@@ -26,16 +26,16 @@ jobs:
         run: ls -al
 
       - name: List terraform directory contents
-        run: ls -al ./terraform
+        run: ls -al ./iac-terraform
 
       - name: List environments directory contents
-        run: ls -al ./terraform/environments
+        run: ls -al ./iac-terraform/environments
 
       - name: List prod directory contents
-        run: ls -al ./terraform/environments/prod
+        run: ls -al ./iac-terraform/environments/prod
 
       - name: Save Service Account Key
-        run: echo "${{ secrets.GCP_SA_KEY }}" > ./terraform/environments/prod/service-account-key.json
+        run: echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -51,17 +51,17 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./terraform/environments/prod
+        working-directory: ./iac-terraform/environments/prod
 
       - name: Terraform Plan
-        run: terraform plan -var="credentials_file_path=./terraform/environments/prod/service-account-key.json" -out=tfplan
-        working-directory: ./terraform/environments/prod
+        run: terraform plan -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -out=tfplan
+        working-directory: ./iac-terraform/environments/prod
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
         with:
           name: tfplan
-          path: ./terraform/environments/prod/tfplan
+          path: ./iac-terraform/environments/prod/tfplan
 
   deploy:
     name: 'Deploy'
@@ -83,10 +83,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: tfplan
-          path: ./terraform/environments/prod
+          path: ./iac-terraform/environments/prod
 
       - name: Save Service Account Key
-        run: echo "${{ secrets.GCP_SA_KEY }}" > ./terraform/environments/prod/service-account-key.json
+        run: echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -101,8 +101,8 @@ jobs:
           terraform_version: 1.1.0
 
       - name: Terraform Apply
-        run: terraform apply -var="credentials_file_path=./terraform/environments/prod/service-account-key.json" -auto-approve ./terraform/environments/prod/tfplan
-        working-directory: ./terraform/environments/prod
+        run: terraform apply -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -auto-approve ./iac-terraform/environments/prod/tfplan
+        working-directory: ./iac-terraform/environments/prod
 
   delete:
     name: 'Delete'
@@ -113,7 +113,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Save Service Account Key
-        run: echo "${{ secrets.GCP_SA_KEY }}" > ./terraform/environments/prod/service-account-key.json
+        run: echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -129,8 +129,8 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
-        working-directory: ./terraform/environments/prod
+        working-directory: ./iac-terraform/environments/prod
 
       - name: Terraform Destroy
-        run: terraform destroy -var="credentials_file_path=./terraform/environments/prod/service-account-key.json" -auto-approve
-        working-directory: ./terraform/environments/prod
+        run: terraform destroy -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -auto-approve
+        working-directory: ./iac-terraform/environments/prod
