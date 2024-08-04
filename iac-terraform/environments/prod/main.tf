@@ -31,13 +31,13 @@ module "secret_manager" {
     source = "../../modules/secret_manager"
 
     secrets = {
-    "feedly-token"               = var.feedly_token
-    "feedly-refresh-token"       = var.feedly_refresh_token
-    "buffer-access-token"        = var.buffer_access_token
-    "buffer-linkedin-profile-id" = var.buffer_linkedin_profile_id
-    "buffer-twitter-profile-id"  = var.buffer_twitter_profile_id
-    "notion-api-token"           = var.notion_api_token
-    "notion-database-id"         = var.notion_database_id
+    "feedly-token"               = "1"
+    "feedly-refresh-token"       = "2"
+    "buffer-access-token"        = "3"
+    "buffer-linkedin-profile-id" = "4"
+    "buffer-twitter-profile-id"  = "5"
+    "notion-api-token"           = "6"
+    "notion-database-id"         = "7"
   }
 }
 
