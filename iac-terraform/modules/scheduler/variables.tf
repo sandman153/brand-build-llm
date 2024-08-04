@@ -1,14 +1,16 @@
 variable "scheduler_name" {
-    type = string
-    default = "gemini-scheduler"
+  description = "The name of the Cloud Scheduler job"
+  type        = string
 }
 
 variable "schedule" {
-    type = string
+  description = "The cron schedule for the job"
+  type        = string
 }
 
 variable "time_zone" {
-    type = string
+  description = "The time zone for the job schedule"
+  type        = string
 }
 
 variable "pubsub_topic" {
