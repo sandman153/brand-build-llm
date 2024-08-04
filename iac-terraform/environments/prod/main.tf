@@ -27,20 +27,6 @@ module "scheduler" {
 
 }
 
-module "secret_manager" {
-    source = "../../modules/secret_manager"
-
-    secrets = {
-    "feedly-token"               = "1"
-    "feedly-refresh-token"       = "2"
-    "buffer-access-token"        = "3"
-    "buffer-linkedin-profile-id" = "4"
-    "buffer-twitter-profile-id"  = "5"
-    "notion-api-token"           = "6"
-    "notion-database-id"         = "7"
-  }
-}
-
 module "iam" {
     source = "../../modules/iam"
 
