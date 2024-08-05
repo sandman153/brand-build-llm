@@ -54,7 +54,7 @@ jobs:
         working-directory: ./iac-terraform/environments/prod
 
       - name: Terraform Plan
-        run: terraform plan -var=credentials_file_path="./iac-terraform/environments/prod/service-account-key.json" -out=tfplan
+        run: terraform plan -var credentials_file_path = "./iac-terraform/environments/prod/service-account-key.json" -out=tfplan
         working-directory: ./iac-terraform/environments/prod
 
       - name: Upload Terraform Plan
@@ -101,7 +101,7 @@ jobs:
           terraform_version: 1.1.0
 
       - name: Terraform Apply
-        run: terraform apply -var=credentials_file_path="./iac-terraform/environments/prod/service-account-key.json" -auto-approve ./iac-terraform/environments/prod/tfplan
+        run: terraform apply -var credentials_file_path = "./iac-terraform/environments/prod/service-account-key.json" -auto-approve ./iac-terraform/environments/prod/tfplan
         working-directory: ./iac-terraform/environments/prod
 
   delete:
@@ -132,5 +132,5 @@ jobs:
         working-directory: ./iac-terraform/environments/prod
 
       - name: Terraform Destroy
-        run: terraform destroy -var=credentials_file_path="./iac-terraform/environments/prod/service-account-key.json" -auto-approve
+        run: terraform destroy -var credentials_file_path = "./iac-terraform/environments/prod/service-account-key.json" -auto-approve
         working-directory: ./iac-terraform/environments/prod
