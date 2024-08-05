@@ -7,6 +7,7 @@
 
 # Set credentials for deployment
 
+
 terraform {
   required_providers {
     google = {
