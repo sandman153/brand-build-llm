@@ -52,6 +52,10 @@ jobs:
       - name: Terraform Init
         run: terraform init
         working-directory: ./iac-terraform/environments/prod
+      
+      - name: Secrets Head
+        run: head -n 2 ./iac-terraform/environments/prod/service-account-key.json | cat -n
+          
 
       - name: Terraform Plan
         run: terraform plan -var credentials_file_path="./iac-terraform/environments/prod/service-account-key.json" -out=tfplan
