@@ -71,7 +71,7 @@ jobs:
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod plan -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
+        run: terraform -chdir=./iac-terraform/environments/prod plan -out=tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}"
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -128,4 +128,4 @@ jobs:
       - name: Terraform Destroy
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod destroy -auto-approve
+        run: terraform -chdir=./iac-terraform/environments/prod destroy -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}"
