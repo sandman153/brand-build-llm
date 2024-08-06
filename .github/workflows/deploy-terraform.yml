@@ -35,7 +35,9 @@ jobs:
           terraform_version: 1.1.0
 
       - name: Save Service Account Key
-        run: echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
+        run: |
+          mkdir -p ./iac-terraform/environments/prod
+          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
 
       - name: List Directory Structure
         run: |
@@ -80,7 +82,9 @@ jobs:
           path: ./iac-terraform/environments/prod
 
       - name: Save Service Account Key
-        run: echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
+        run: |
+          mkdir -p ./iac-terraform/environments/prod
+          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
 
       - name: Terraform Apply
         run: terraform -chdir=./iac-terraform/environments/prod apply -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -auto-approve tfplan
@@ -95,7 +99,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Save Service Account Key
-        run: echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
+        run: |
+          mkdir -p ./iac-terraform/environments/prod
+          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
 
       - name: Terraform Init
         run: terraform -chdir=./iac-terraform/environments/prod init
