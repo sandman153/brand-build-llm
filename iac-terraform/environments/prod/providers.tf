@@ -1,6 +1,9 @@
 provider "google" {
-    project     = var.project_id
-    region      = var.region
-    zone        = var.zone
-    credentials = file(var.credentials_file_path)
+  project     = var.project_id
+  region      = var.region
+  credentials = data.local_file.sa_key.content
+}
+
+data "local_file" "sa_key" {
+  filename = var.credentials_file_path
 }
