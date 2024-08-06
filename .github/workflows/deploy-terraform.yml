@@ -57,6 +57,13 @@ jobs:
       - name: Terraform Init
         run: terraform -chdir=./iac-terraform/environments/prod init
 
+      - name: List Directory Structure
+        run: |
+          ls -al
+          ls -al ./iac-terraform
+          ls -al ./iac-terraform/environments
+          ls -al ./iac-terraform/environments/prod
+
       - name: Terraform Plan
         run: terraform -chdir=./iac-terraform/environments/prod plan -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -out=tfplan
 
