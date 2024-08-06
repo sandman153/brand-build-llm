@@ -6,6 +6,6 @@ resource "google_cloud_scheduler_job" "gemini_scheduler" {
   pubsub_target {
     topic_name = var.pubsub_topic
     #data       = jsonencode({ message = "Trigger Function" })
-    data       = base64encode({ message = "Trigger Function" })
+    data       = base64encode( "Trigger Function" )
   }
 }
