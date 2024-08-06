@@ -35,7 +35,10 @@ jobs:
           terraform_version: 1.1.0
 
       - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: echo "GOOGLE_CREDENTIALS=${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+        run: |
+          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: List Directory Structure
         run: |
@@ -88,7 +91,10 @@ jobs:
           path: ./iac-terraform/environments/prod
 
       - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: echo "GOOGLE_CREDENTIALS=${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+        run: |
+          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Terraform Apply
         env:
@@ -105,7 +111,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: echo "GOOGLE_CREDENTIALS=${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+        run: |
+          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Terraform Init
         env:
