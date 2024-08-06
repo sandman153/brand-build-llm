@@ -41,10 +41,16 @@ jobs:
 
       - name: List Directory Structure
         run: |
+          echo "Listing root directory:"
           ls -al
+          echo "Listing iac-terraform directory:"
           ls -al ./iac-terraform
+          echo "Listing environments directory:"
           ls -al ./iac-terraform/environments
+          echo "Listing prod directory:"
           ls -al ./iac-terraform/environments/prod
+          echo "Displaying content of service-account-key.json:"
+          cat ./iac-terraform/environments/prod/service-account-key.json
 
   terraform:
     name: Terraform Operations
@@ -53,21 +59,12 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      
-      - name: Save Service Account Key
-        run: |
-          mkdir -p ./iac-terraform/environments/prod
-          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
+
+      - name: Delay to Ensure File Availability
+        run: sleep 10
 
       - name: Terraform Init
         run: terraform -chdir=./iac-terraform/environments/prod init
-
-      - name: List Directory Structure
-        run: |
-          ls -al
-          ls -al ./iac-terraform
-          ls -al ./iac-terraform/environments
-          ls -al ./iac-terraform/environments/prod
 
       - name: Terraform Plan
         run: terraform -chdir=./iac-terraform/environments/prod plan -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -out=tfplan
