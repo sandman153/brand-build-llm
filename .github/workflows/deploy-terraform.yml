@@ -53,6 +53,11 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+      
+      - name: Save Service Account Key
+        run: |
+          mkdir -p ./iac-terraform/environments/prod
+          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
 
       - name: Terraform Init
         run: terraform -chdir=./iac-terraform/environments/prod init
