@@ -34,10 +34,8 @@ jobs:
         with:
           terraform_version: 1.1.0
 
-      - name: Save Service Account Key
-        run: |
-          mkdir -p ./iac-terraform/environments/prod
-          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
+      - name: Set GOOGLE_CREDENTIALS Environment Variable
+        run: echo "GOOGLE_CREDENTIALS=${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
 
       - name: List Directory Structure
         run: |
@@ -49,8 +47,6 @@ jobs:
           ls -al ./iac-terraform/environments
           echo "Listing prod directory:"
           ls -al ./iac-terraform/environments/prod
-          echo "Displaying content of service-account-key.json:"
-          cat ./iac-terraform/environments/prod/service-account-key.json
 
   terraform:
     name: Terraform Operations
@@ -60,14 +56,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Delay to Ensure File Availability
-        run: sleep 10
-
       - name: Terraform Init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir=./iac-terraform/environments/prod init
 
       - name: Terraform Plan
-        run: terraform -chdir=./iac-terraform/environments/prod plan -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -out=tfplan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir=./iac-terraform/environments/prod plan -out=tfplan
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -90,13 +87,13 @@ jobs:
           name: tfplan
           path: ./iac-terraform/environments/prod
 
-      - name: Save Service Account Key
-        run: |
-          mkdir -p ./iac-terraform/environments/prod
-          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
+      - name: Set GOOGLE_CREDENTIALS Environment Variable
+        run: echo "GOOGLE_CREDENTIALS=${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
 
       - name: Terraform Apply
-        run: terraform -chdir=./iac-terraform/environments/prod apply -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -auto-approve tfplan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir=./iac-terraform/environments/prod apply -auto-approve tfplan
 
   delete:
     name: Delete
@@ -107,13 +104,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Save Service Account Key
-        run: |
-          mkdir -p ./iac-terraform/environments/prod
-          echo "${{ secrets.GCP_SA_KEY }}" > ./iac-terraform/environments/prod/service-account-key.json
+      - name: Set GOOGLE_CREDENTIALS Environment Variable
+        run: echo "GOOGLE_CREDENTIALS=${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
 
       - name: Terraform Init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir=./iac-terraform/environments/prod init
 
       - name: Terraform Destroy
-        run: terraform -chdir=./iac-terraform/environments/prod destroy -var="credentials_file_path=./iac-terraform/environments/prod/service-account-key.json" -auto-approve
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir=./iac-terraform/environments/prod destroy -auto-approve
