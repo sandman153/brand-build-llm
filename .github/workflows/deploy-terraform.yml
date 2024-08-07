@@ -43,6 +43,7 @@ jobs:
           echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
           echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+        shell: bash
 
       - name: List Directory Structure
         run: |
@@ -54,6 +55,7 @@ jobs:
           ls -al ./iac-terraform/environments
           echo "Listing prod directory:"
           ls -al ./iac-terraform/environments/prod
+        shell: bash
 
   terraform:
     name: Terraform Operations
@@ -67,11 +69,13 @@ jobs:
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars
+        shell: bash
 
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform plan -input=false '-var="credentials=${{ secrets.GCP_SA_KEY }}"' -out=./iac-terraform/environments/prod/tfplan -state=./iac-terraform/environments/prod/terraform.tfstate ./iac-terraform/environments/prod
+        run: terraform plan -input=false -out=./iac-terraform/environments/prod/tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}" ./iac-terraform/environments/prod
+        shell: bash
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -99,11 +103,13 @@ jobs:
           echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
           echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+        shell: bash
 
       - name: Terraform Apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform apply -input=false -auto-approve ./iac-terraform/environments/prod/tfplan -state=./iac-terraform/environments/prod/terraform.tfstate
+        run: terraform apply -input=false -auto-approve ./iac-terraform/environments/prod/tfplan
+        shell: bash
 
   destroy:
     name: Destroy
@@ -119,13 +125,16 @@ jobs:
           echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
           echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+        shell: bash
 
       - name: Terraform Init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars
+        shell: bash
 
       - name: Terraform Destroy
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}" -state=./iac-terraform/environments/prod/terraform.tfstate ./iac-terraform/environments/prod
+        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}" ./iac-terraform/environments/prod
+        shell: bash
