@@ -36,7 +36,7 @@ jobs:
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: 1.1.0
+          terraform_version: latest
 
       - name: Set GOOGLE_CREDENTIALS Environment Variable
         run: |
@@ -73,7 +73,7 @@ jobs:
         working-directory: ./iac-terraform/environments/prod
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform plan -input=false --var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
+        run: terraform plan -input=false -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
