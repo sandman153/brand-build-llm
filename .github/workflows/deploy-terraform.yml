@@ -71,7 +71,7 @@ jobs:
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform plan -input=false -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=./iac-terraform/environments/prod/tfplan -state=./iac-terraform/environments/prod/terraform.tfstate ./iac-terraform/environments/prod
+        run: terraform plan -input=false '-var="credentials=${{ secrets.GCP_SA_KEY }}"' -out=./iac-terraform/environments/prod/tfplan -state=./iac-terraform/environments/prod/terraform.tfstate ./iac-terraform/environments/prod
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
