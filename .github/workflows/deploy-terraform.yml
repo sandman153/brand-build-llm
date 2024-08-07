@@ -66,12 +66,16 @@ jobs:
       - name: Terraform Init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod init -input=false -backend-config=backend.tfvars
+        run: |
+          cd ./iac-terraform/environments/prod
+          terraform init -input=false -backend-config=backend.tfvars
 
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod plan -input=false -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
+        run: |
+          cd ./iac-terraform/environments/prod
+          terraform plan -input=false -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -103,7 +107,9 @@ jobs:
       - name: Terraform Apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod apply -input=false -auto-approve tfplan
+        run: |
+          cd ./iac-terraform/environments/prod
+          terraform apply -input=false -auto-approve tfplan
 
   destroy:
     name: Destroy
@@ -123,9 +129,13 @@ jobs:
       - name: Terraform Init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod init -input=false -backend-config=backend.tfvars
+        run: |
+          cd ./iac-terraform/environments/prod
+          terraform init -input=false -backend-config=backend.tfvars
 
       - name: Terraform Destroy
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}"
+        run: |
+          cd ./iac-terraform/environments/prod
+          terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}"
