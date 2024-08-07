@@ -67,7 +67,7 @@ jobs:
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=./iac-terraform/environments/prod plan -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
+        run: terraform -chdir="./iac-terraform/environments/prod" plan -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
 
 
       - name: Upload Terraform Plan
