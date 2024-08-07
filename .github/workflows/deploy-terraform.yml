@@ -50,11 +50,11 @@ jobs:
           echo "Listing root directory:"
           ls -al
           echo "Listing iac-terraform directory:"
-          ls -al ./iac-terraform
+          ls -al "./iac-terraform"
           echo "Listing environments directory:"
-          ls -al ./iac-terraform/environments
+          ls -al "./iac-terraform/environments"
           echo "Listing prod directory:"
-          ls -al ./iac-terraform/environments/prod
+          ls -al "./iac-terraform/environments/prod"
         shell: bash
 
   terraform:
@@ -68,20 +68,20 @@ jobs:
       - name: Terraform Init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars
+        run: terraform init -input=false -backend-config="./iac-terraform/environments/prod/backend.tfvars"
         shell: bash
 
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform plan -input=false -out=./iac-terraform/environments/prod/tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}" ./iac-terraform/environments/prod
+        run: terraform plan -input=false -out="./iac-terraform/environments/prod/tfplan" -var="credentials=${{ secrets.GCP_SA_KEY }}" "./iac-terraform/environments/prod"
         shell: bash
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
         with:
           name: tfplan
-          path: ./iac-terraform/environments/prod/tfplan
+          path: "./iac-terraform/environments/prod/tfplan"
 
   deploy:
     name: Deploy
@@ -96,7 +96,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: tfplan
-          path: ./iac-terraform/environments/prod/tfplan
+          path: "./iac-terraform/environments/prod/tfplan"
 
       - name: Set GOOGLE_CREDENTIALS Environment Variable
         run: |
@@ -108,7 +108,7 @@ jobs:
       - name: Terraform Apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform apply -input=false -auto-approve ./iac-terraform/environments/prod/tfplan
+        run: terraform apply -input=false -auto-approve "./iac-terraform/environments/prod/tfplan"
         shell: bash
 
   destroy:
@@ -130,11 +130,11 @@ jobs:
       - name: Terraform Init
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars
+        run: terraform init -input=false -backend-config="./iac-terraform/environments/prod/backend.tfvars"
         shell: bash
 
       - name: Terraform Destroy
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}" ./iac-terraform/environments/prod
+        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}" "./iac-terraform/environments/prod"
         shell: bash
