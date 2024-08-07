@@ -64,16 +64,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Terraform Init
-        working-directory: ./iac-terraform/environments/prod
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -backend-config=backend.tfvars
+        run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars
 
       - name: Terraform Plan
-        working-directory: ./iac-terraform/environments/prod
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform plan -input=false -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=tfplan
+        run: terraform plan -input=false -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=./iac-terraform/environments/prod/tfplan -state=./iac-terraform/environments/prod/terraform.tfstate ./iac-terraform/environments/prod
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -103,10 +101,9 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Terraform Apply
-        working-directory: ./iac-terraform/environments/prod
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform apply -input=false -auto-approve tfplan
+        run: terraform apply -input=false -auto-approve ./iac-terraform/environments/prod/tfplan -state=./iac-terraform/environments/prod/terraform.tfstate
 
   destroy:
     name: Destroy
@@ -124,13 +121,11 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Terraform Init
-        working-directory: ./iac-terraform/environments/prod
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -backend-config=backend.tfvars
+        run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars
 
       - name: Terraform Destroy
-        working-directory: ./iac-terraform/environments/prod
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}"
+        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}" -state=./iac-terraform/environments/prod/terraform.tfstate ./iac-terraform/environments/prod
