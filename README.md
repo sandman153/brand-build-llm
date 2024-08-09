@@ -435,7 +435,9 @@ MIT License - Copyright (c) 2021 The terraform-docs Authors.
 [User Guide]: https://terraform-docs.io/user-guide/introduction/
 ## Requirements
 
-No requirements.
+| Name | Version |
+|------|---------|
+| <a name="requirement_google"></a> [google](#requirement\_google) | 5.39.1 |
 
 ## Providers
 
@@ -451,7 +453,13 @@ No resources.
 
 ## Inputs
 
-No inputs.
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| <a name="input_credentials_file_path"></a> [credentials\_file\_path](#input\_credentials\_file\_path) | The path to the GCP service account credentials file | `string` | n/a | yes |
+| <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The project ID in GCP | `string` | `"brand-build-gemini"` | no |
+| <a name="input_region"></a> [region](#input\_region) | The region in GCP | `string` | `"australia-southeast1"` | no |
+| <a name="input_time_zone"></a> [time\_zone](#input\_time\_zone) | The time zone for the scheduler job | `string` | n/a | yes |
+| <a name="input_zone"></a> [zone](#input\_zone) | The zone in GCP | `string` | `"australia-southeast1-a"` | no |
 
 ## Outputs
 
