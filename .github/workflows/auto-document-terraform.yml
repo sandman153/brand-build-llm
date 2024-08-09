@@ -17,10 +17,20 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v3
 
-    - name: Set up Terraform Docs
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.0  # Specify the version of Terraform you want to use
+
+    - name: Download Terraform Docs
       run: |
-        curl -sSL https://terraform-docs.io/terraform-docs-install.sh | sh -s v0.16.0
+        curl -LO https://github.com/terraform-docs/terraform-docs/releases/download/v0.16.0/terraform-docs-v0.16.0-linux-amd64.tar.gz
+
+    - name: Extract and Install Terraform Docs
+      run: |
+        tar -xzf terraform-docs-v0.16.0-linux-amd64.tar.gz
         sudo mv terraform-docs /usr/local/bin/
+        rm terraform-docs-v0.16.0-linux-amd64.tar.gz
 
     - name: Generate Terraform Documentation
       run: |
