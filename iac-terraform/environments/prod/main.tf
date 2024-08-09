@@ -1,3 +1,10 @@
+module "google_storage_bucket" {
+  source = "../../modules/storage"
+  bucket_name = "gemini-bucket"
+  location = var.region
+}
+
+
 module "cloud_functions" {
   source = "../../modules/cloud_functions"
 

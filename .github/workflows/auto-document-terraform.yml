@@ -1,0 +1,51 @@
+name: Auto-Document Terraform
+
+on:
+  push:
+    paths:
+      - '**/*.tf'
+  pull_request:
+    paths:
+      - '**/*.tf'
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    - name: Set up Terraform Docs
+      run: |
+        curl -sSL https://terraform-docs.io/terraform-docs-install.sh | sh -s v0.16.0
+        sudo mv terraform-docs /usr/local/bin/
+
+    - name: Generate Terraform Documentation
+      run: |
+        terraform-docs markdown . > TEMP_README.md
+
+    - name: Insert Terraform Documentation in README.md
+      run: |
+        sed -i '/<!-- BEGIN TERRAFORM DOCS -->/,/<!-- END TERRAFORM DOCS -->/c\<!-- BEGIN TERRAFORM DOCS -->\n'$(cat TEMP_README.md)'\n<!-- END TERRAFORM DOCS -->' README.md
+        rm TEMP_README.md
+
+    - name: Generate Documentation for Modules and Environments
+      run: |
+        for dir in $(find . -type d -name 'modules' -or -name 'environments'); do
+          for module in $(find $dir -maxdepth 1 -mindepth 1 -type d); do
+            terraform-docs markdown $module > $module/README.md
+          done
+        done
+
+    - name: Commit and Push Documentation
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add README.md
+        git add **/README.md
+        git commit -m "Auto-generated Terraform documentation"
+        git push origin HEAD:main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
