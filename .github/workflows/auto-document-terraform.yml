@@ -36,10 +36,20 @@ jobs:
       run: |
         terraform-docs markdown . > TEMP_README.md
 
-    - name: Insert Terraform Documentation in README.md
+    - name: Insert Terraform Documentation into README.md
       run: |
-        sed -i '/<!-- BEGIN TERRAFORM DOCS -->/,/<!-- END TERRAFORM DOCS -->/c\<!-- BEGIN TERRAFORM DOCS -->\n'$(cat TEMP_README.md)'\n<!-- END TERRAFORM DOCS -->' README.md
-        rm TEMP_README.md
+        # Extract the content before and after the placeholders
+        sed -n '1,/<!-- BEGIN TERRAFORM DOCS -->/p' README.md > README_PREFIX.md
+        sed -n '/<!-- END TERRAFORM DOCS -->/,$p' README.md > README_SUFFIX.md
+
+        # Combine the files together
+        cat README_PREFIX.md TEMP_README.md README_SUFFIX.md > README_NEW.md
+
+        # Replace the old README.md with the new one
+        mv README_NEW.md README.md
+
+        # Cleanup
+        rm TEMP_README.md README_PREFIX.md README_SUFFIX.md
 
     - name: Generate Documentation for Modules and Environments
       run: |
