@@ -63,9 +63,8 @@ jobs:
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git add README.md
-        git add iac-terraform/**/README.md
-        git commit -m "Auto-generated Terraform documentation"
+        git add README.md iac-terraform/**/README.md LICENSE
+        git commit -m "Auto-generated Terraform documentation" || echo "No changes to commit"
         git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/sandman153/brand-build-llm.git HEAD:main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
