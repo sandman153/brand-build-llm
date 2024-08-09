@@ -3,10 +3,10 @@ name: Auto-Document Terraform
 on:
   push:
     paths:
-      - '**/*.tf'
+      - 'iac-terraform/**/*.tf'
   pull_request:
     paths:
-      - '**/*.tf'
+      - 'iac-terraform/**/*.tf'
   workflow_dispatch:
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
 
     - name: Generate Terraform Documentation
       run: |
-        terraform-docs markdown . > TEMP_README.md
+        terraform-docs markdown iac-terraform > TEMP_README.md
 
     - name: Insert Terraform Documentation into README.md
       run: |
@@ -53,7 +53,7 @@ jobs:
 
     - name: Generate Documentation for Modules and Environments
       run: |
-        for dir in $(find . -type d -name 'modules' -or -name 'environments'); do
+        for dir in $(find iac-terraform -type d -name 'modules' -or -name 'environments'); do
           for module in $(find $dir -maxdepth 1 -mindepth 1 -type d); do
             terraform-docs markdown $module > $module/README.md
           done
@@ -64,8 +64,8 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         git add README.md
-        git add **/README.md
+        git add iac-terraform/**/README.md
         git commit -m "Auto-generated Terraform documentation"
-        git push origin HEAD:main
+        git push https://x-access-token:${{ secrets.PAT_TOKEN }}@github.com/sandman153/brand-build-llm.git HEAD:main
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
