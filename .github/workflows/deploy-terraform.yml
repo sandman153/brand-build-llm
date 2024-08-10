@@ -50,12 +50,12 @@ jobs:
       - name: Terraform Init
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=environments/prod init -input=false -reconfigure
+        run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
       - name: Terraform Plan
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir=environments/prod plan -input=false -out=tfplan
+        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
