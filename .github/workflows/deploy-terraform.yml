@@ -43,13 +43,20 @@ jobs:
       - name: Enable Service Usage API
         run: gcloud services enable serviceusage.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Enable Other Required APIs
-        run: |
-          gcloud services enable iam.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-          gcloud services enable pubsub.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-          gcloud services enable cloudfunctions.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-          gcloud services enable cloudscheduler.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-          gcloud services enable storage.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+      - name: Enable IAM API
+        run: gcloud services enable iam.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Enable Pub/Sub API
+        run: gcloud services enable pubsub.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Enable Cloud Functions API
+        run: gcloud services enable cloudfunctions.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Enable Cloud Scheduler API
+        run: gcloud services enable cloudscheduler.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Enable Storage API
+        run: gcloud services enable storage.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
 
   terraform-operations:
     name: Terraform Operations
@@ -68,7 +75,9 @@ jobs:
         run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
       - name: Terraform Plan
-        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}"
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -97,6 +106,8 @@ jobs:
           path: ./iac-terraform/environments/prod/tfplan
 
       - name: Terraform Apply
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" apply -input=false -auto-approve
 
   destroy-resources:
@@ -114,4 +125,6 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Terraform Destroy
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" destroy -input=false -auto-approve
