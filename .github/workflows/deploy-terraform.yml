@@ -28,19 +28,9 @@ on:
           - destroy
 
 jobs:
-  install-terraform:
-    name: Install Terraform
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: latest
-
   enable-apis:
     name: Enable Required APIs
     runs-on: ubuntu-latest
-    needs: install-terraform
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
