@@ -52,11 +52,11 @@ jobs:
           echo "Listing root directory:"
           ls -al
           echo "Listing terraform directory:"
-          ls -al "./terraform"
+          ls -al "./iac-terraform"
           echo "Listing environments directory:"
-          ls -al "./terraform/environments"
+          ls -al "./iac-terraform/environments"
           echo "Listing selected environment directory:"
-          ls -al "./terraform/environments/${{ github.event.inputs.environment || 'prod' }}"
+          ls -al "./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}"
         shell: bash
 
   terraform:
