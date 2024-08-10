@@ -21,8 +21,3 @@ variable "time_zone" {
     type = string
     default = "Australia/Sydney"  
 }
-
-variable "credentials" {
-  description = "The GCP service account credentials"
-  type        = string
-}
