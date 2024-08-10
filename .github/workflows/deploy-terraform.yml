@@ -1,4 +1,4 @@
-name: Brand Build CI/CD
+name: Deploy Terraform with GCP
 
 on:
   push:
@@ -47,28 +47,71 @@ jobs:
         with:
           terraform_version: latest
 
-      - name: Prepare Credentials
-        id: prepare_creds
-        run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > gcp-sa-key.json
-        shell: bash
-
       - name: Terraform Init
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
-
-      - name: Debug Command
-        run: |
-          echo "terraform -chdir=\"./iac-terraform/environments/prod\" plan -input=false -out=tfplan -var='credentials=$(cat gcp-sa-key.json)'"
 
       - name: Terraform Plan
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan -var="credentials=$(cat gcp-sa-key.json)"
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}"
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
         with:
           name: tfplan
           path: ./iac-terraform/environments/prod/tfplan
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: ${{ github.event.inputs.action == 'deploy' }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v2
+        with:
+          name: tfplan
+          path: ./iac-terraform/environments/prod/tfplan
+
+      - name: Set GOOGLE_CREDENTIALS Environment Variable
+        run: |
+          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Terraform Apply
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" apply -input=false -auto-approve tfplan
+
+  destroy:
+    name: Destroy
+    runs-on: ubuntu-latest
+    needs: terraform
+    if: ${{ github.event.inputs.action == 'destroy' }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set GOOGLE_CREDENTIALS Environment Variable
+        run: |
+          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
+          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Terraform Init
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
+
+      - name: Terraform Destroy
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" destroy -input=false -auto-approve
