@@ -24,7 +24,6 @@ No resources.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_credentials"></a> [credentials](#input\_credentials) | The GCP service account credentials | `string` | n/a | yes |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | The GCP project ID | `string` | `"brand-build-gemini"` | no |
 | <a name="input_region"></a> [region](#input\_region) | The region in GCP | `string` | `"australia-southeast1"` | no |
 | <a name="input_time_zone"></a> [time\_zone](#input\_time\_zone) | The time zone for the scheduler job | `string` | `"Australia/Sydney"` | no |
