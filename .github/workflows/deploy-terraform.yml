@@ -40,7 +40,7 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v2
@@ -55,7 +55,7 @@ jobs:
       - name: Terraform Plan
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}"
+        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -78,13 +78,6 @@ jobs:
           name: tfplan
           path: ./iac-terraform/environments/prod/tfplan
 
-      - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: |
-          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-        shell: bash
-
       - name: Terraform Apply
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
@@ -98,13 +91,6 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-
-      - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: |
-          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-        shell: bash
 
       - name: Terraform Init
         env:
