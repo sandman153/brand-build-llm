@@ -22,11 +22,6 @@ variable "time_zone" {
     default = "Australia/Sydney"  
 }
 
-/* variable "credentials_file_path" {
-  description = "The path to the GCP service account credentials file"
-  type = string
-} */
-
 variable "credentials" {
   description = "The GCP service account credentials"
   type        = string
