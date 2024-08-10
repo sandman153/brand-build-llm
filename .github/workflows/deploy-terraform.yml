@@ -28,8 +28,8 @@ on:
           - destroy
 
 jobs:
-  setup:
-    name: Setup Environment
+  terraform:
+    name: Terraform Operations
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -47,45 +47,21 @@ jobs:
         with:
           terraform_version: latest
 
-      - name: List Directory Structure
-        run: |
-          echo "Listing root directory:"
-          ls -al
-          echo "Listing terraform directory:"
-          ls -al "./iac-terraform"
-          echo "Listing environments directory:"
-          ls -al "./iac-terraform/environments"
-          echo "Listing selected environment directory:"
-          ls -al "./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}"
-        shell: bash
-
-  terraform:
-    name: Terraform Operations
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
       - name: Terraform Init
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -reconfigure
-        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
-        shell: bash
+        run: terraform -chdir=environments/prod init -input=false -reconfigure
 
       - name: Terraform Plan
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform plan -input=false -out=tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}"
-        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
-        shell: bash
+        run: terraform -chdir=environments/prod plan -input=false -out=tfplan
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
         with:
           name: tfplan
-          path: "./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}/tfplan"
+          path: environments/prod/tfplan
 
   deploy:
     name: Deploy
@@ -100,7 +76,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: tfplan
-          path: "./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}/tfplan"
+          path: environments/prod/tfplan
 
       - name: Set GOOGLE_CREDENTIALS Environment Variable
         run: |
@@ -112,9 +88,7 @@ jobs:
       - name: Terraform Apply
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform apply -input=false -auto-approve tfplan
-        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
-        shell: bash
+        run: terraform -chdir=environments/prod apply -input=false -auto-approve tfplan
 
   destroy:
     name: Destroy
@@ -135,13 +109,9 @@ jobs:
       - name: Terraform Init
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -reconfigure
-        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
-        shell: bash
+        run: terraform -chdir=environments/prod init -input=false -reconfigure
 
       - name: Terraform Destroy
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}"
-        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
-        shell: bash
+        run: terraform -chdir=environments/prod destroy -input=false -auto-approve
