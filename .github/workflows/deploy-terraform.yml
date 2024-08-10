@@ -28,9 +28,19 @@ on:
           - destroy
 
 jobs:
-  terraform:
+  install-terraform:
+    name: Install Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: latest
+
+  terraform-operations:
     name: Terraform Operations
     runs-on: ubuntu-latest
+    needs: install-terraform
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -41,11 +51,6 @@ jobs:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
         env:
           GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: latest
 
       - name: Terraform Init
         env:
@@ -63,14 +68,19 @@ jobs:
           name: tfplan
           path: ./iac-terraform/environments/prod/tfplan
 
-  deploy:
+  deploy-resources:
     name: Deploy Resources
     runs-on: ubuntu-latest
-    needs: terraform
-    if: ${{ github.event.inputs.action == 'deploy' }}
+    needs: terraform-operations
+    if: ${{ github.event.inputs.action == 'deploy' || github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Terraform Init (Re-run)
+        env:
+          TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v2
@@ -83,10 +93,10 @@ jobs:
           TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" apply -input=false -auto-approve
 
-  destroy:
-    name: Destroy
+  destroy-resources:
+    name: Destroy Resources
     runs-on: ubuntu-latest
-    needs: terraform
+    needs: terraform-operations
     if: ${{ github.event.inputs.action == 'destroy' }}
     steps:
       - name: Checkout Code
