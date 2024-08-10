@@ -64,7 +64,7 @@ jobs:
           path: ./iac-terraform/environments/prod/tfplan
 
   deploy:
-    name: Deploy
+    name: Deploy Resources
     runs-on: ubuntu-latest
     needs: terraform
     if: ${{ github.event.inputs.action == 'deploy' }}
