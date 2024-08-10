@@ -1,7 +1,15 @@
+#Enable required APIs
+
+module enable_apis {
+  source = "../../modules/enable-apis"
+  project_id = var.project_id
+} 
+
 module "google_storage_bucket" {
   source = "../../modules/storage"
   bucket_name = "gemini-bucket"
   location = var.region
+  depends_on = [ module.enable_apis ]
 }
 
 
@@ -14,6 +22,7 @@ module "cloud_functions" {
   region = var.region
   zone = var.zone
   project_id = var.project_id
+  depends_on = [ module.enable_apis ]
 }
 
 
@@ -22,6 +31,7 @@ module "pubsub" {
 
   topic_name        = "gemini-topic"
   subscription_name = "gemini-subscription"
+  depends_on = [ module.enable_apis ]
 }
 
 module "scheduler" {
@@ -31,6 +41,7 @@ module "scheduler" {
   schedule = "0 0 * * *"
   time_zone = var.time_zone
   pubsub_topic = module.pubsub.topic_name
+  depends_on = [ module.enable_apis ]
 
 }
 
@@ -38,4 +49,5 @@ module "iam" {
     source = "../../modules/iam"
 
     project_id = var.project_id
+    depends_on = [ module.enable_apis ]
 }
