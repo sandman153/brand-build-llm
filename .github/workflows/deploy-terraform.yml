@@ -71,21 +71,21 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform init -input=false -reconfigure
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
         shell: bash
 
       - name: Terraform Plan
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform plan -input=false -out=tfplan -var="credentials=${{ secrets.GCP_SA_KEY }}"
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
         shell: bash
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
         with:
           name: tfplan
-          path: "./terraform/environments/${{ github.event.inputs.environment || 'prod' }}/tfplan"
+          path: "./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}/tfplan"
 
   deploy:
     name: Deploy
@@ -100,7 +100,7 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: tfplan
-          path: "./terraform/environments/${{ github.event.inputs.environment || 'prod' }}/tfplan"
+          path: "./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}/tfplan"
 
       - name: Set GOOGLE_CREDENTIALS Environment Variable
         run: |
@@ -113,7 +113,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform apply -input=false -auto-approve tfplan
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
         shell: bash
 
   destroy:
@@ -136,12 +136,12 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform init -input=false -reconfigure
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
         shell: bash
 
       - name: Terraform Destroy
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
         run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}"
-        working-directory: ./terraform/environments/${{ github.event.inputs.environment || 'prod' }}
+        working-directory: ./iac-terraform/environments/${{ github.event.inputs.environment || 'prod' }}
         shell: bash
