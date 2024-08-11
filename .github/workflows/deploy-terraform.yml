@@ -73,10 +73,10 @@ jobs:
 
       - name: Import Existing Resources
         run: |
-          # Import existing resources into Terraform state
-          terraform import google_service_account.gemini_service_account projects/${{ secrets.GCP_PROJECT_ID }}/serviceAccounts/gemini-service-account@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com || true
-          terraform import google_pubsub_topic.gemini_topic projects/${{ secrets.GCP_PROJECT_ID }}/topics/gemini-topic || true
-          terraform import google_storage_bucket.infra_rss_summarizer your-bucket-name || true
+          # Import existing resources into Terraform state if they exist
+          terraform state list | grep "google_service_account.gemini_service_account" || terraform import google_service_account.gemini_service_account projects/${{ secrets.GCP_PROJECT_ID }}/serviceAccounts/gemini-service-account@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com || true
+          terraform state list | grep "google_pubsub_topic.gemini_topic" || terraform import google_pubsub_topic.gemini_topic projects/${{ secrets.GCP_PROJECT_ID }}/topics/gemini-topic || true
+          terraform state list | grep "google_storage_bucket.infra_rss_summarizer" || terraform import google_storage_bucket.infra_rss_summarizer your-bucket-name || true
 
       - name: Terraform Init
         env:
