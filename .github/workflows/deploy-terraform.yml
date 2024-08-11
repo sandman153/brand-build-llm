@@ -86,14 +86,16 @@ jobs:
       - name: Terraform Init
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_region: ${{ secrets.GCP_REGION || 'australia-southeast1' }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE || 'australia-southeast1-a' }}
           TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
       - name: Terraform Plan
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_region: ${{ secrets.GCP_REGION || 'australia-southeast1' }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE || 'australia-southeast1-a' }}
           TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan
 
@@ -120,7 +122,8 @@ jobs:
       - name: Terraform Init (Deploy)
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_region: ${{ secrets.GCP_REGION || 'australia-southeast1' }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE || 'australia-southeast1-a' }}
           TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
@@ -133,7 +136,8 @@ jobs:
       - name: Terraform Apply
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_region: ${{ secrets.GCP_REGION || 'australia-southeast1' }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE || 'australia-southeast1-a' }}
           TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" apply -input=false -auto-approve
 
@@ -154,13 +158,15 @@ jobs:
       - name: Terraform Init (Destroy)
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_region: ${{ secrets.GCP_REGION || 'australia-southeast1' }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE || 'australia-southeast1-a' }}
           TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
       - name: Terraform Destroy
         env:
           TF_VAR_project_id: ${{ secrets.GCP_PROJECT_ID }}
-          TF_VAR_region: ${{ secrets.GCP_REGION }}
+          TF_VAR_region: ${{ secrets.GCP_REGION || 'australia-southeast1' }}
+          TF_VAR_zone: ${{ secrets.GCP_ZONE || 'australia-southeast1-a' }}
           TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
         run: terraform -chdir="./iac-terraform/environments/prod" destroy -input=false -auto-approve
