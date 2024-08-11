@@ -73,9 +73,7 @@ jobs:
 
       - name: Assign IAM Policy Binding
         run: |
-          gcloud projects add-iam-policy-binding ${{ secrets.GCP_PROJECT_ID }} \
-            --member="serviceAccount:${{ secrets.GCP_SA_EMAIL }}" \
-            --role="roles/owner"
+          gcloud projects add-iam-policy-binding ${{ secrets.GCP_PROJECT_ID }} --member="serviceAccount:${{ secrets.GCP_SA_EMAIL }}" --role="roles/owner"
 
       - name: Terraform Init
         env:
