@@ -7,18 +7,19 @@ locals {
 }
 
 resource "google_storage_bucket" "infra-rss-summarizer" {
-   project = var.project_id
-   name = local.unique_bucket_name
-   location = var.location 
-   storage_class = "STANDARD"
-   versioning {
-       enabled = true
-   }
-   lifecycle_rule {
-     action {
-         type = "Delete"
-     }
-     condition {
-          age = 365
+  project       = var.project_id
+  name          = local.unique_bucket_name
+  location      = var.location
+  storage_class = "STANDARD"
+  versioning {
+    enabled = true
+  }
+  lifecycle_rule {
+    action {
+      type = "Delete"
     }
+    condition {
+      age = 365
+    }
+  }
 }
