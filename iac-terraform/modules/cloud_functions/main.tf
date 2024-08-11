@@ -5,8 +5,8 @@ resource "google_cloudfunctions_function" "gemini_function" {
     region = var.region
 
     # Following set to empty values as they will be deployed later
-    source_archive_bucket = "" # Remove this line entirely during initial setup
-    source_archive_object = "" # Remove this line entirely during initial setup
+    #source_archive_bucket = "" # Remove this line entirely during initial setup
+    #source_archive_object = "" # Remove this line entirely during initial setup
 
     trigger_http = true
 
