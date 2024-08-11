@@ -7,3 +7,9 @@ variable "location" {
   type        = string
   description = "The location of the S3 bucket"
 }
+
+variable "project_id" {
+  type        = string
+  description = "The GCP project ID"
+  
+}

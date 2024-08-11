@@ -1,7 +1,7 @@
 variable "project_id" {
   description = "The GCP project ID" 
   type = string
-  default = "brand-build-gemini"
+  default = "sb-gemini-brand-building"
 }
 
 variable "region" {
