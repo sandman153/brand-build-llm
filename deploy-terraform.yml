@@ -1,4 +1,4 @@
-name: Brand Build CI/CD
+name: Deploy Terraform with GCP
 
 on:
   push:
@@ -9,6 +9,15 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
       action:
         description: 'Action to perform: deploy or destroy'
         required: true
@@ -19,59 +28,58 @@ on:
           - destroy
 
 jobs:
-  setup:
-    name: Setup Environment
+  enable-apis:
+    name: Enable Required APIs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up GCP SDK
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/auth@v1
         with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          export_default_credentials: true
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_version: 1.1.0
+      - name: Enable Service Usage API
+        run: gcloud services enable serviceusage.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: |
-          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+      - name: Enable IAM API
+        run: gcloud services enable iam.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
 
-      - name: List Directory Structure
-        run: |
-          echo "Listing root directory:"
-          ls -al
-          echo "Listing iac-terraform directory:"
-          ls -al ./iac-terraform
-          echo "Listing environments directory:"
-          ls -al ./iac-terraform/environments
-          echo "Listing prod directory:"
-          ls -al ./iac-terraform/environments/prod
+      - name: Enable Pub/Sub API
+        run: gcloud services enable pubsub.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
 
-  terraform:
+      - name: Enable Cloud Functions API
+        run: gcloud services enable cloudfunctions.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Enable Cloud Scheduler API
+        run: gcloud services enable cloudscheduler.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Enable Storage API
+        run: gcloud services enable storage.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+
+  terraform-operations:
     name: Terraform Operations
     runs-on: ubuntu-latest
-    needs: setup
+    needs: enable-apis
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Set up GCP SDK for Terraform
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
       - name: Terraform Init
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars -from-module=./iac-terraform/environments/prod
+          TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
       - name: Terraform Plan
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform plan -input=false -var="credentials=${{ secrets.GCP_SA_KEY }}" -out=./iac-terraform/environments/prod/tfplan
+          TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" plan -input=false -out=tfplan
 
       - name: Upload Terraform Plan
         uses: actions/upload-artifact@v2
@@ -79,53 +87,46 @@ jobs:
           name: tfplan
           path: ./iac-terraform/environments/prod/tfplan
 
-  deploy:
-    name: Deploy
+  deploy-resources:
+    name: Deploy Resources
     runs-on: ubuntu-latest
-    needs: terraform
-    if: ${{ github.event_name == 'push' || github.event.inputs.action == 'deploy' }}
+    needs: terraform-operations
+    if: ${{ github.event.inputs.action == 'deploy' || github.ref == 'refs/heads/main' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Set up GCP SDK for Terraform Apply
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Download Terraform Plan
         uses: actions/download-artifact@v2
         with:
           name: tfplan
-          path: ./iac-terraform/environments/prod
-
-      - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: |
-          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          path: ./iac-terraform/environments/prod/tfplan
 
       - name: Terraform Apply
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform apply -input=false -auto-approve ./iac-terraform/environments/prod/tfplan
+          TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" apply -input=false -auto-approve
 
-  destroy:
-    name: Destroy
+  destroy-resources:
+    name: Destroy Resources
     runs-on: ubuntu-latest
-    needs: terraform
+    needs: terraform-operations
     if: ${{ github.event.inputs.action == 'destroy' }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Set GOOGLE_CREDENTIALS Environment Variable
-        run: |
-          echo "GOOGLE_CREDENTIALS<<EOF" >> $GITHUB_ENV
-          echo "${{ secrets.GCP_SA_KEY }}" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
-      - name: Terraform Init
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform init -input=false -backend-config=./iac-terraform/environments/prod/backend.tfvars -from-module=./iac-terraform/environments/prod
+      - name: Set up GCP SDK for Terraform Destroy
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Terraform Destroy
         env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
-        run: terraform destroy -input=false -auto-approve -var="credentials=${{ secrets.GCP_SA_KEY }}" ./iac-terraform/environments/prod
+          TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" destroy -input=false -auto-approve

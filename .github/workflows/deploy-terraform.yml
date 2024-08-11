@@ -101,6 +101,11 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Terraform Init (Deploy)
+        env:
+          TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
+
       - name: Download Terraform Plan
         uses: actions/download-artifact@v2
         with:
@@ -125,6 +130,11 @@ jobs:
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Terraform Init (Destroy)
+        env:
+          TF_VAR_credentials: ${{ secrets.GCP_SA_KEY }}
+        run: terraform -chdir="./iac-terraform/environments/prod" init -input=false -reconfigure
 
       - name: Terraform Destroy
         env:
