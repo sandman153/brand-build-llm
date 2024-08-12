@@ -37,26 +37,15 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Enable Service Usage API
-        run: gcloud services enable serviceusage.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Enable IAM API
-        run: gcloud services enable iam.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Enable Pub/Sub API
-        run: gcloud services enable pubsub.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Enable Cloud Functions API
-        run: gcloud services enable cloudfunctions.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Enable Cloud Scheduler API
-        run: gcloud services enable cloudscheduler.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Enable Storage API
-        run: gcloud services enable storage.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Enable Cloud Resource Manager API
-        run: gcloud services enable cloudresourcemanager.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
+      - name: Enable APIs
+        run: |
+          gcloud services enable serviceusage.googleapis.com \
+                                 iam.googleapis.com \
+                                 pubsub.googleapis.com \
+                                 cloudfunctions.googleapis.com \
+                                 cloudscheduler.googleapis.com \
+                                 storage.googleapis.com \
+                                 cloudresourcemanager.googleapis.com --project=${{ secrets.GCP_PROJECT_ID }}
 
   terraform-operations:
     name: Terraform Operations
@@ -73,7 +62,7 @@ jobs:
 
       - name: Import Existing Resources
         run: |
-          # Import existing resources into Terraform state if they exist
+          # Import existing resources if they are not yet in the Terraform state
           terraform state list | grep "google_service_account.gemini_service_account" || terraform import google_service_account.gemini_service_account projects/${{ secrets.GCP_PROJECT_ID }}/serviceAccounts/gemini-service-account@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com || true
           terraform state list | grep "google_pubsub_topic.gemini_topic" || terraform import google_pubsub_topic.gemini_topic projects/${{ secrets.GCP_PROJECT_ID }}/topics/gemini-topic || true
           terraform state list | grep "google_storage_bucket.infra_rss_summarizer" || terraform import google_storage_bucket.infra_rss_summarizer your-bucket-name || true
